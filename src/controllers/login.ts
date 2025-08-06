@@ -103,26 +103,10 @@ export const getInfoUsuarioBD = async (req: Request, res: Response) => {
         }
 
         const [results, metadata] = await sequelize.query(`
-            select 
-                u.id as id_usuario,
-                r.id_rol,
-                e.id_empresa,
-                u.usuario,
-                u.nombre,
-                u.apellido,
-                concat(u.nombre, ' ', u.apellido) as nombre_completo,
-                r.rol,
-                e.empresa,
-                f_obtener_modulos_usuario(u.id) as modulos,
-                u.blob_foto_perfil
-            from t_usuarios u
-            join t_rol r
-                on r.id_rol = u.id_rol
-            join t_empresa e 
-                on e.id_empresa = u.id_empresa
-            where 
-                u.id = ${tokenDesencriptado.idUser}
-                and u.estado = 'A'
+            select *
+            from f_obtener_datos_usuario(
+                ${tokenDesencriptado.idUser} 
+            )
         `);
 
         res.json({
