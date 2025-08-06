@@ -33,6 +33,7 @@ export const loginUser = async (req: Request, res: Response) => {
     console.log(username);
     console.log(passwordEncry);
 
+    // 1 Validamos si existe el usuario
     const usuarioExiste:any = await Usuario.findOne({
         where : {
             usuario : username
@@ -43,6 +44,21 @@ export const loginUser = async (req: Request, res: Response) => {
     if(!usuarioExiste) {
         res.status(400).json({
             msg: 'No existe el usuario: '+username+', en la base de datos'
+        })
+    }
+
+    // Validamos si esta activo
+    const usuarioActivo:any = await Usuario.findOne({
+        where : {
+            usuario : username,
+            estado : 'A'
+        }
+    });
+
+    // Si el usuario NO existe
+    if(!usuarioActivo) {
+        res.status(400).json({
+            msg: 'El usuario: '+username+' se encuentra INACTIVO.'
         })
     }
 

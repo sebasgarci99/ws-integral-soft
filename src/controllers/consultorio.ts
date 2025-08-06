@@ -78,9 +78,10 @@ export const borrarConsultorio = async (req: Request, res: Response) => {
                 body: ' Consultorio cod: '+codigoConsultorioBD+ ', NO Existe'
             })
         } else {
+
             let usuarioExiste = await Usuario.findOne({
                 where : { 
-                    nombre : consultorioExiste[0]?.getDataValue('correo'),
+                    usuario : consultorioExiste[0]?.getDataValue('correo'),
                     estado : 'A'
                 }
             });
