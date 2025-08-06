@@ -5,7 +5,7 @@ const sequelize = new Sequelize(
     'db_jgarcia',
     '990327abc', 
     {
-        host: 'localhost',
+        host: '72.60.24.55',
         port: 5432, 
         dialect: 'postgres'
     }

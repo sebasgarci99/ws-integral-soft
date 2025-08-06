@@ -64,7 +64,7 @@ class Server {
 
         // ✅ Habilitar CORS para Angular
         this.app.use(cors({
-            origin: process.env.ENDPOINT_CONSUMO,
+            origin: 'https://integral-soft.com.co',
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             credentials: true
         }));
