@@ -36,7 +36,10 @@ export const getConsultorios = async (req: Request, res: Response) => {
                         { id_usuario: idUsuario },
                         { id_empresa: usuarioEnviado?.getDataValue('id_empresa')}
                     ]
-                }
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ]
             });
         }
 
@@ -153,38 +156,96 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
             id_empresa: req.body.id_empresa
         }
 
-        let usuarioExiste = await Usuario.findOne({
-            where : { 
-                nombre : consultorio.correo,
-                estado : 'A'
+        // Validar si el correo ya está en otro consultorio de otra empresa
+        let correoExistenteOtraEmpresa = await Consultorio.findOne({
+            where: {
+                correo: consultorio.correo,
+                id_empresa: consultorio.id_empresa  // Op.ne = distinto
             }
         });
 
-        const passwordEncryConsultorio = await bcrypt.hash(
-            consultorio.codigo+consultorio.correo,
-            12
-        );
+        if (correoExistenteOtraEmpresa) {
+            res.json({
+                msg: 'Crear/Actualizar CONSULTORIO',
+                state: 'NO_OK',
+                body: `El correo ${consultorio.correo} ya está registrado con otra empresa.`
+            });
+        } else {
 
-        // Si envian el id del consultorio, se procede a actualizar
-        if(codigoConsultorioBD != null && codigoConsultorioBD != '') {
-            console.log("Actualizar CONSULTORIO")
-            let existeConsultorio = await Consultorio.findAll({
-                where : {
-                    id : codigoConsultorioBD
+            // Si el correo del consultorio a crear NO existe, continuamos el flujo
+            // Validamos si el usuario del consultorio ya existe
+            let usuarioExiste = await Usuario.findOne({
+                where : { 
+                    nombre : consultorio.correo,
+                    estado : 'A'
                 }
             });
 
-            if(existeConsultorio.length == 0) {
-                res.json({
-                    msg: 'Crear/Actualizar CONSULTORIO',
-                    state: 'NO_OK',
-                    body : 'NO existe el consultorio con ID: '+codigoConsultorioBD
-                })
-            }
+            const passwordEncryConsultorio = await bcrypt.hash(
+                consultorio.codigo+consultorio.correo,
+                12
+            );
 
-            // Actualizamos el consultorio
-            await Consultorio.update(
-                {
+            // Si envian el id del consultorio, se procede a actualizar
+            if(codigoConsultorioBD != null && codigoConsultorioBD != '') {
+                console.log("Actualizar CONSULTORIO")
+                let existeConsultorio = await Consultorio.findAll({
+                    where : {
+                        id : codigoConsultorioBD
+                    }
+                });
+
+                if(existeConsultorio.length == 0) {
+                    res.json({
+                        msg: 'Crear/Actualizar CONSULTORIO',
+                        state: 'NO_OK',
+                        body : 'NO existe el consultorio con ID: '+codigoConsultorioBD
+                    })
+                }
+
+                // Actualizamos el consultorio
+                await Consultorio.update(
+                    {
+                        codigo : consultorio.codigo,
+                        descripcion : consultorio.descripcion,
+                        nombre_representante : consultorio.nombre_representante,
+                        info_recoleccion : consultorio.info_recoleccion,
+                        piso_ubicacion : consultorio.piso_ubicacion,
+                        aforo : consultorio.aforo,
+                        correo : consultorio.correo,
+                        estado : consultorio.estado,
+                        id_usuario: consultorio.id_usuario
+                    },
+                    {
+                        where : {
+                            id : codigoConsultorioBD
+                        }
+                    }
+                ); 
+
+                // De una vez actualizamos el usuario
+                await Usuario.update(
+                    {
+                        usuario : consultorio.email,
+                        password : passwordEncryConsultorio
+                    },
+                    {
+                        where : {
+                            id : usuarioExiste?.getDataValue('id')
+                        }
+                    }
+                );
+
+                res.json({
+                    msg: 'Actualizar CONSULTORIO',
+                    state: 'OK',
+                    body : 'Consultorio actualizado correctamente.'
+                })
+
+            } else {
+                console.log("Crear CONSULTORIO")
+                // Si no envian el ID, se procede a INSERTAR
+                await Consultorio.create({
                     codigo : consultorio.codigo,
                     descripcion : consultorio.descripcion,
                     nombre_representante : consultorio.nombre_representante,
@@ -193,75 +254,37 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
                     aforo : consultorio.aforo,
                     correo : consultorio.correo,
                     estado : consultorio.estado,
-                    id_usuario: consultorio.id_usuario
-                },
-                {
-                    where : {
-                       id : codigoConsultorioBD
+                    id_usuario: consultorio.id_usuario,
+                    id_empresa: consultorio.id_empresa
+                });
+
+                // De una vez actualizamos el usuario de CONSULTORIO
+                let usuarioCreado = await Usuario.create(
+                    {
+                        usuario : consultorio.correo,
+                        password : passwordEncryConsultorio,
+                        estado: 'A',
+                        id_rol: 3, // Siempre va a ser 3
+                        id_empresa: consultorio.id_empresa,
+                        nombre : consultorio.codigo,
+                        apellido : consultorio.correo
                     }
-                }
-            ); 
+                );
 
-            // De una vez actualizamos el usuario
-            await Usuario.update(
-                {
-                    usuario : consultorio.email,
-                    password : passwordEncryConsultorio
-                },
-                {
-                    where : {
-                        id : usuarioExiste?.getDataValue('id')
-                    }
-                }
-            );
+                // Y el respectivo permiso al modulo 3 de reportes
+                await ModuloxUsuario.create({
+                    id_modulo : 2,
+                    id_usuario : usuarioCreado?.getDataValue('id')
+                });
 
-            res.json({
-                msg: 'Actualizar CONSULTORIO',
-                state: 'OK',
-                body : 'Consultorio actualizado correctamente.'
-            })
-
-        } else {
-            console.log("Crear CONSULTORIO")
-            // Si no envian el ID, se procede a INSERTAR
-            await Consultorio.create({
-                codigo : consultorio.codigo,
-                descripcion : consultorio.descripcion,
-                nombre_representante : consultorio.nombre_representante,
-                info_recoleccion : consultorio.info_recoleccion,
-                piso_ubicacion : consultorio.piso_ubicacion,
-                aforo : consultorio.aforo,
-                correo : consultorio.correo,
-                estado : consultorio.estado,
-                id_usuario: consultorio.id_usuario,
-                id_empresa: consultorio.id_empresa
-            });
-
-            // De una vez actualizamos el usuario de CONSULTORIO
-            let usuarioCreado = await Usuario.create(
-                {
-                    usuario : consultorio.correo,
-                    password : passwordEncryConsultorio,
-                    estado: 'A',
-                    id_rol: 3, // Siempre va a ser 3
-                    id_empresa: consultorio.id_empresa,
-                    nombre : consultorio.codigo,
-                    apellido : consultorio.correo
-                }
-            );
-
-            // Y el respectivo permiso al modulo 3 de reportes
-            await ModuloxUsuario.create({
-                id_modulo : 2,
-                id_usuario : usuarioCreado?.getDataValue('id')
-            });
-
-            res.json({
-                msg: 'Crear CONSULTORIO',
-                state: 'OK',
-                body : 'Consultorio creado correctamente.'
-            })
+                res.json({
+                    msg: 'Crear CONSULTORIO',
+                    state: 'OK',
+                    body : 'Consultorio creado correctamente.'
+                })
+            }            
         }
+
     } catch(e) {
         res.json({
             msg: 'Crear/Actualizar CONSULTORIO',

@@ -35,7 +35,7 @@ export const Consultorio = sequelize.define('t_consultorio', {
     aforo: {
         type: DataTypes.INTEGER,
         unique: false,
-        allowNull: false
+        allowNull: true
     },
     correo: {
         type: DataTypes.STRING,
