@@ -158,17 +158,30 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
 
         // Validar si el correo ya está en otro consultorio de otra empresa
         let correoExistenteOtraEmpresa = await Consultorio.findOne({
-            where: {
-                correo: consultorio.correo,
-                id_empresa: consultorio.id_empresa  // Op.ne = distinto
+             where: {
+                [Op.or]: [
+                    // Caso 1: correo en otra empresa
+                    {
+                        correo: consultorio.correo,
+                        id_empresa: { [Op.ne]: consultorio.id_empresa }
+                    },
+                    // Caso 2: correo en misma empresa pero con nombre distinto
+                    {
+                        correo: consultorio.correo,
+                        id_empresa: consultorio.id_empresa,
+                        codigo: { [Op.ne]: `${consultorio.codigo}` }
+                    }
+                ]
             }
         });
+
+        console.log("-----------------------------------------------")
 
         if (correoExistenteOtraEmpresa) {
             res.json({
                 msg: 'Crear/Actualizar CONSULTORIO',
                 state: 'NO_OK',
-                body: `El correo ${consultorio.correo} ya está registrado con otra empresa.`
+                body: `El correo ${consultorio.correo} ya está registrado con otra empresa o en otro consultorio.`
             });
         } else {
 
@@ -176,7 +189,10 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
             // Validamos si el usuario del consultorio ya existe
             let usuarioExiste = await Usuario.findOne({
                 where : { 
-                    nombre : consultorio.correo,
+                    [Op.or]: [
+                        { usuario: consultorio.correo },
+                        { nombre: consultorio.codigo }
+                    ],
                     estado : 'A'
                 }
             });
@@ -213,7 +229,6 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
                         piso_ubicacion : consultorio.piso_ubicacion,
                         aforo : consultorio.aforo,
                         correo : consultorio.correo,
-                        estado : consultorio.estado,
                         id_usuario: consultorio.id_usuario
                     },
                     {
@@ -223,10 +238,15 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
                     }
                 ); 
 
+                console.log(consultorio.correo);
+                console.log(passwordEncryConsultorio);
+                console.log(usuarioExiste);
+                    
                 // De una vez actualizamos el usuario
                 await Usuario.update(
                     {
-                        usuario : consultorio.email,
+                        usuario : consultorio.correo,
+                        apellido : consultorio.correo,
                         password : passwordEncryConsultorio
                     },
                     {
