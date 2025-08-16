@@ -114,18 +114,18 @@ export const sendReportes = async (
                     }
                 });
 
-                let fromMail = `Reporte del registro de residuos - ${infoConsultorio?.getDataValue('correo')} - Software IntegralSoft`;
+                let fromMail = `Reporte del registro de residuos - ${infoConsultorio?.getDataValue('correo')} - Software Integral-Soft`;
                 let subjectMail = `Registro de residuos - ${tipoReporte.toUpperCase()} - Consultorio: ${infoConsultorio?.getDataValue('codigo')} | Software Integral-Soft`;
                 
                 // Encabezado de tabla del cuerpo del correo
                 let htmlMail = `
-                    Hola <strong>${infoConsultorio?.getDataValue('codigo')}-${infoConsultorio?.getDataValue('nombre_representante')}</strong>
+                    Hola <k><strong>${infoConsultorio?.getDataValue('codigo')}-${infoConsultorio?.getDataValue('nombre_representante')}</strong></k>
                     <br>
-                    Hemos realizado correcta y satisfactoriamente el registro de tus residuos peligrosos los cuales por ley deberán tener un proceso de disposición diferente.
+                    Hemos realizado correcta y satisfactoriamente el registro de los residuos peligrosos producidos los cuales por ley deberán tener un proceso de disposición y tratamiento diferente.
                     <br>
-                    Te adjuntamos la información general de lo recolectado, el reporte generado es: ${tipoReporte}, por lo que su análisis queda a completa disposición de ustedes.
+                    Te adjuntamos la información general de lo recolectado, el reporte generado es: ${tipoReporte}, por lo que su análisis y estudio queda a su completa disposición.
                     <br>
-                    <h2>Registro de residuos</h2>
+                    <h2>Registro de peso de los residuos producidos</h2>
                     <p><strong>Consultorio:</strong> ${infoConsultorio?.getDataValue("codigo")}-${infoConsultorio?.getDataValue('nombre_representante')} ${infoConsultorio?.getDataValue('descripcion')}</p>
                     <p><strong>Tipo de reporte:</strong> ${tipoReporte}</p>
                     <p><strong>Fecha de generación del reporte:</strong> ${fechaActual}</p>
