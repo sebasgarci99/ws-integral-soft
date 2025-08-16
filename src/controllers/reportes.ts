@@ -13,7 +13,19 @@ export const getReportTotalizado = async (req: Request, res: Response) => {
     
     try {
         const [results, metadata] = await sequelize.query(`
-            select *
+            select 
+                codigo,
+                no_aprovechables,
+                biosanitarios,
+                cortopunzantes_ng,
+                cortopunzantes_k,
+                anatomopatologicos,
+                farmacos,
+                chatarra_electronica,
+                pilas,
+                quimicos,
+                iluminarias,
+                total
             from 
                 f_obtener_totalizado_registro_peso(
                     ${idUsuario},
@@ -47,7 +59,20 @@ export const getReportDetallado = async (req: Request, res: Response) => {
     
     try {
         const [results, metadata] = await sequelize.query(`
-            select *
+            select 
+                codigo,
+                fecha,
+                no_aprovechables,
+                biosanitarios,
+                cortopunzantes_ng,
+                cortopunzantes_k,
+                anatomopatologicos,
+                farmacos,
+                chatarra_electronica,
+                pilas,
+                quimicos,
+                iluminarias,
+                total
             from 
                 f_obtener_detalle_registro_peso(
                     ${idUsuario},

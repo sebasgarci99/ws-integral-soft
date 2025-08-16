@@ -3,6 +3,7 @@ import routeUsuario from '../routes/usuario';
 import routeConsultorio from '../routes/consultorios';
 import routeRecoleccion from '../routes/registro_recoleccion';
 import routeReportes from '../routes/reportes';
+import routeCorreoSmtp from '../routes/correo_smtp_empresa';
 
 import sequelize from '../db/connection';
 import { Usuario } from './usuario';
@@ -13,6 +14,7 @@ import cors from 'cors'; // ✅ Importar cors
 import { Consultorio } from './consultorio';
 import { RegistroRecoleccion } from './registro_recoleccion';
 import { ModuloxUsuario } from './modxusuario';
+import { CorreoSmtpEmpresa } from './correo_smtp_empresas';
 
 class Server {
     private app : express.Application;
@@ -44,19 +46,11 @@ class Server {
 
         //this.app.post('/api/login', loginUser)
         
-        // Enrutamos /api/usuario para que todas las rutas sub-agregadas a estas
-        // se lancen de la clase de usuario
         this.app.use('/api/usuario', routeUsuario);
-
-        // Enrutamos /api/consultorio para que todas las rutas sub-agregadas a estas
-        // se lancen de la clase de consultorio
         this.app.use('/api/consultorio', routeConsultorio);
-
-        // Enrutamos /api/consultorio para que todas las rutas sub-agregadas a estas
-        // se lancen de la clase de registros recolección
         this.app.use('/api/reg_recoleccion', routeRecoleccion);
-
         this.app.use('/api/reportes', routeReportes);
+        this.app.use('/api/enviarmail', routeCorreoSmtp);
     }
 
     midlewares() {
@@ -85,6 +79,7 @@ class Server {
             await Consultorio.sync();
             await RegistroRecoleccion.sync();
             await ModuloxUsuario.sync();
+            await CorreoSmtpEmpresa.sync();
 
         } catch(error) {
             console.error("Error de conexión a la bd: ", error);
