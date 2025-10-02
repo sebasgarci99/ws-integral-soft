@@ -4,6 +4,7 @@ import routeConsultorio from '../routes/consultorios';
 import routeRecoleccion from '../routes/registro_recoleccion';
 import routeReportes from '../routes/reportes';
 import routeCorreoSmtp from '../routes/correo_smtp_empresa';
+import routeVacunas from '../routes/vacunas';
 
 import sequelize from '../db/connection';
 import { Usuario } from './usuario';
@@ -15,6 +16,8 @@ import { Consultorio } from './consultorio';
 import { RegistroRecoleccion } from './registro_recoleccion';
 import { ModuloxUsuario } from './modxusuario';
 import { CorreoSmtpEmpresa } from './correo_smtp_empresas';
+import { Laboratorio } from './laboratorio';
+import { Vacunas } from './vacunas';
 
 class Server {
     private app : express.Application;
@@ -51,6 +54,7 @@ class Server {
         this.app.use('/api/reg_recoleccion', routeRecoleccion);
         this.app.use('/api/reportes', routeReportes);
         this.app.use('/api/enviarmail', routeCorreoSmtp);
+        this.app.use('/api/vacunas', routeVacunas);
     }
 
     midlewares() {
@@ -80,6 +84,8 @@ class Server {
             await RegistroRecoleccion.sync();
             await ModuloxUsuario.sync();
             await CorreoSmtpEmpresa.sync();
+            await Laboratorio.sync();
+            await Vacunas.sync();
 
         } catch(error) {
             console.error("Error de conexión a la bd: ", error);

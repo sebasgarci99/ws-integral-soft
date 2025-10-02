@@ -191,7 +191,7 @@ export const crearActualizarConsultorio = async (req: Request, res: Response) =>
                 where : { 
                     [Op.or]: [
                         { usuario: consultorio.correo },
-                        { nombre: consultorio.codigo }
+                        { nombre: `${consultorio.codigo}` }
                     ],
                     estado : 'A'
                 }
