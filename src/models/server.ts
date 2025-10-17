@@ -5,6 +5,7 @@ import routeRecoleccion from '../routes/registro_recoleccion';
 import routeReportes from '../routes/reportes';
 import routeCorreoSmtp from '../routes/correo_smtp_empresa';
 import routeVacunas from '../routes/vacunas';
+import routePacientes from '../routes/pacientes';
 
 import sequelize from '../db/connection';
 import { Usuario } from './usuario';
@@ -18,6 +19,10 @@ import { ModuloxUsuario } from './modxusuario';
 import { CorreoSmtpEmpresa } from './correo_smtp_empresas';
 import { Laboratorio } from './laboratorio';
 import { Vacunas } from './vacunas';
+import { Paciente } from './pacientes';
+import { AntecedenteMedico } from './antecedentes_medicos';
+import { DatoAdministrativo } from './datos_admin_pacientes';
+
 
 class Server {
     private app : express.Application;
@@ -55,6 +60,7 @@ class Server {
         this.app.use('/api/reportes', routeReportes);
         this.app.use('/api/enviarmail', routeCorreoSmtp);
         this.app.use('/api/vacunas', routeVacunas);
+        this.app.use('/api/pacientes', routePacientes)
     }
 
     midlewares() {
@@ -79,14 +85,18 @@ class Server {
             await sequelize.authenticate();
             console.log("Conexión con éxito a la bd, actualizando tablas en bd...");
 
+            // Se crean o actualizan las tablas y clases instanciadas del proyecto
             await Usuario.sync();
             await Consultorio.sync();
             await RegistroRecoleccion.sync();
             await ModuloxUsuario.sync();
             await CorreoSmtpEmpresa.sync();
             await Laboratorio.sync();
-            await Vacunas.sync();
-
+            await Vacunas.sync(); 
+            await Paciente.sync();
+            await AntecedenteMedico.sync();
+            await DatoAdministrativo.sync();
+            
         } catch(error) {
             console.error("Error de conexión a la bd: ", error);
         }
