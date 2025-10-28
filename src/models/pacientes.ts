@@ -43,6 +43,9 @@ export const Paciente = sequelize.define('t_pacientes', {
     telefono_contacto: {
         type: DataTypes.STRING(20) // Nullable
     },
+    correo_electronico: {
+        type: DataTypes.STRING(50) // Nullable
+    },
     estado: {
         type: DataTypes.STRING
     },

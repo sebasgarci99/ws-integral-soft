@@ -87,6 +87,7 @@ export const crearPaciente = async (req: Request, res: Response) => {
                 direccion_residencia, 
                 municipio_residencia, 
                 telefono_contacto,
+                correo_electronico,
                 
                 // Datos de t_antecedentes_medicos
                 enfermedades_actuales, 
@@ -135,6 +136,7 @@ export const crearPaciente = async (req: Request, res: Response) => {
                     direccion_residencia, 
                     municipio_residencia, 
                     telefono_contacto,
+                    correo_electronico,
                     id_usuario : idUsuario,
                     id_empresa : idEmpresa
                 }, { transaction: t });
@@ -217,6 +219,7 @@ export const actualizarPaciente = async (req: Request, res: Response) => {
                 direccion_residencia, 
                 municipio_residencia, 
                 telefono_contacto,
+                correo_electronico,
 
                 // Datos de t_antecedentes_medicos
                 enfermedades_actuales, 
@@ -253,7 +256,8 @@ export const actualizarPaciente = async (req: Request, res: Response) => {
                     sexo, 
                     direccion_residencia, 
                     municipio_residencia, 
-                    telefono_contacto
+                    telefono_contacto,
+                    correo_electronico
                 }, { transaction: t });
 
                 // 2. Actualizar el registro en la tabla de Antecedentes Médicos
