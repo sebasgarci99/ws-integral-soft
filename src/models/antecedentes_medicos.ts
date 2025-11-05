@@ -38,5 +38,23 @@ export const AntecedenteMedico = sequelize.define('t_antecedentes_medicos', {
     id_usuario: {
         type : DataTypes.INTEGER,
         allowNull: false
-    }
+    },
+    tiene_enfermedad_actual: {
+        type: DataTypes.BOOLEAN
+    },
+    es_alergico: {
+        type: DataTypes.BOOLEAN
+    },
+    tiene_fiebre_actual: {
+        type: DataTypes.BOOLEAN
+    },
+    padece_convulsiones: {
+        type: DataTypes.BOOLEAN
+    },
+    reaccion_vacuna: {
+        type: DataTypes.BOOLEAN
+    },
+    tenido_vacuna_ultsemanas: {
+        type: DataTypes.BOOLEAN
+    },
 });

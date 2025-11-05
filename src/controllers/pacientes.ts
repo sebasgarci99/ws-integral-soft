@@ -96,6 +96,12 @@ export const crearPaciente = async (req: Request, res: Response) => {
                 esta_lactando, 
                 reacciones_previas_vacunas, 
                 alergias_graves,
+                tiene_enfermedad_actual,
+                es_alergico,
+                tiene_fiebre_actual,
+                padece_convulsiones,
+                reaccion_vacuna,
+                tenido_vacuna_ultsemanas,
                 
                 // Datos de t_datos_admin_pacientes
                 eps, 
@@ -151,6 +157,12 @@ export const crearPaciente = async (req: Request, res: Response) => {
                     esta_lactando, 
                     reacciones_previas_vacunas, 
                     alergias_graves,
+                    tiene_enfermedad_actual,
+                    es_alergico,
+                    tiene_fiebre_actual,
+                    padece_convulsiones,
+                    reaccion_vacuna,
+                    tenido_vacuna_ultsemanas,
                     id_usuario : idUsuario,
                     id_empresa : idEmpresa
                 }, { transaction: t });
@@ -228,6 +240,12 @@ export const actualizarPaciente = async (req: Request, res: Response) => {
                 esta_lactando, 
                 reacciones_previas_vacunas, 
                 alergias_graves,
+                tiene_enfermedad_actual,
+                es_alergico,
+                tiene_fiebre_actual,
+                padece_convulsiones,
+                reaccion_vacuna,
+                tenido_vacuna_ultsemanas,
 
                 // Datos de t_datos_admin_pacientes
                 eps, 
@@ -273,7 +291,13 @@ export const actualizarPaciente = async (req: Request, res: Response) => {
                         esta_embarazada, 
                         esta_lactando, 
                         reacciones_previas_vacunas, 
-                        alergias_graves
+                        alergias_graves,
+                        tiene_enfermedad_actual,
+                        es_alergico,
+                        tiene_fiebre_actual,
+                        padece_convulsiones,
+                        reaccion_vacuna,
+                        tenido_vacuna_ultsemanas
                     }, { transaction: t });
                 }
 
