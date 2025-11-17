@@ -6,6 +6,7 @@ import routeReportes from '../routes/reportes';
 import routeCorreoSmtp from '../routes/correo_smtp_empresa';
 import routeVacunas from '../routes/vacunas';
 import routePacientes from '../routes/pacientes';
+import routeRegVacunacion from '../routes/registro_vacunacion';
 
 import sequelize from '../db/connection';
 import { Usuario } from './usuario';
@@ -23,6 +24,9 @@ import { Paciente } from './pacientes';
 import { AntecedenteMedico } from './antecedentes_medicos';
 import { DatoAdministrativo } from './datos_admin_pacientes';
 
+import { RegVacunacion } from './registro_vacunacion';
+import { RegVacunacionVacunas } from './registro_vacunacion_vacunas';
+import { Doc_Consentimiento } from './doc_consentimiento';
 
 class Server {
     private app : express.Application;
@@ -60,7 +64,8 @@ class Server {
         this.app.use('/api/reportes', routeReportes);
         this.app.use('/api/enviarmail', routeCorreoSmtp);
         this.app.use('/api/vacunas', routeVacunas);
-        this.app.use('/api/pacientes', routePacientes)
+        this.app.use('/api/pacientes', routePacientes);
+        this.app.use('/api/reg_vacunacion', routeRegVacunacion);
     }
 
     midlewares() {
@@ -96,7 +101,10 @@ class Server {
             await Paciente.sync();
             await AntecedenteMedico.sync();
             await DatoAdministrativo.sync();
-            
+            await RegVacunacion.sync();
+            await RegVacunacionVacunas.sync();
+            await Doc_Consentimiento.sync();
+
         } catch(error) {
             console.error("Error de conexión a la bd: ", error);
         }
