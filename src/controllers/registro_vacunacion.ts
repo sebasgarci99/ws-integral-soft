@@ -29,6 +29,29 @@ const getIdUsuarioDesdeToken = (req: Request): number | null => {
     }
 };
 
+// ================================
+// Función para obtener el idEmpresa desde el token
+// ================================
+const getIdEmpresaDesdeToken = (req: Request): number | null => {
+    const headerToken = req.headers["authorization"];
+
+    if (!headerToken) return null;
+
+    // Capturamos exclusivamente el token quitando "Bearer "
+    const bearerToken = headerToken.slice(7);
+
+    try {
+        const tokenDesencriptado: any = jwt.verify(
+            bearerToken, 
+            process.env.SECRET_KEY || 'pRu3b4_4sD1*2*3'
+        );
+        return tokenDesencriptado.idEmpresa;
+    } catch (error) {
+        console.error("Error al decodificar el token:", error);
+        return null;
+    }
+};
+
 const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital: any): Promise<any | null> => {
     try {
         if(idVacunacion != 0 || idVacunacion != null) {
@@ -150,19 +173,38 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
                 RETURNING *;
             `;
 
-            const [resultado] = await sequelize.query(
-                sql, 
+            const result: any = await sequelize.query(
+                sql,
                 {
                     replacements: { 
-                        idVacunacion,
-                        firma
+                        idVacunacion, 
+                        firma 
                     },
-                    type: QueryTypes.INSERT,
+                    type: QueryTypes.RAW
                 }
             );
 
-            console.log(resultado)
-            return resultado;  
+            const rows = result[0]; 
+            if (rows && rows[0] && rows[0].id_consentimiento) {
+                // Extraemos el HTML del consentimiento creado.
+                sql = `
+                    select f_procesar_datos_consentimiento(:idVacunacion);
+                `;
+
+                const resultDocConsentimiento: any = await sequelize.query(
+                    sql, 
+                    {
+                        replacements: { 
+                            idVacunacion
+                        },
+                        type: QueryTypes.SELECT,
+                    }
+                );
+
+                return resultDocConsentimiento[0].f_procesar_datos_consentimiento;
+            } else {
+                console.log("No se inserto correctamente.");
+            }
 
         }
     } catch(error) {
@@ -397,7 +439,8 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
 
     try {
         const idUsuario = getIdUsuarioDesdeToken(req);
-        if (!idUsuario) {
+        const idEmpresa = getIdEmpresaDesdeToken(req);
+        if (!idUsuario || !idEmpresa) {
             res.status(401).json({
                 msg: "Token inválido o ausente",
                 state: "NO_OK",
@@ -415,7 +458,7 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                 num_documento_acudiente: req.body.num_documento_acudiente,
                 acudiente: req.body.acudiente,
                 estado: req.body.estado || "A",
-                id_empresa: req.body.id_empresa,
+                id_empresa: idEmpresa,
                 id_usuario: idUsuario,
             };
 
@@ -438,12 +481,14 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                         }
                     );
 
-                    // registroCreado = await RegVacunacion.findByPk(id_vacunacion);
+                    registroCreado = await RegVacunacion.findByPk(id_vacunacion);
 
-                    // // Borramos las vacunas anteriores y volvemos a insertar
-                    // await RegVacunacionVacunas.destroy({
-                    //     where: { id_vacunacion },
-                    // });
+                    // Borramos las vacunas inyectadas en el proceso anterior y volvemos a insertar las seleccionas 
+                    await RegVacunacionVacunas.destroy({
+                        where: { id_vacunacion },
+                    });
+
+
                 }
             } else {
                 registroCreado = await RegVacunacion.create(registro);
@@ -478,7 +523,10 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                     ? "Actualizar Registro Vacunación"
                     : "Crear Registro Vacunación",
                 state: "OK",
-                body: data_consentimiento.id_consentimiento,
+                body: {
+                    registroCreado,
+                    f_procesar_datos_consentimiento: data_consentimiento
+                }
             });
         }
     } catch (error) {
