@@ -91,8 +91,8 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
                     r.aplica_acudiente,
                     current_timestamp, -- fecha registro 
                     :firma::text, -- firma digital paciente
-                    u.firma_digital, -- firma digital usuario
-                    e.logo_empresa,
+                    NULL, -- u.firma_digital, -- firma digital usuario o empresa NOTA=Se deja en NULL para no generar tanto peso
+                    null, -- e.logo_empresa, -- NOTA=Se deja en NULL para no generar tanto peso
                     r.id_empresa,
                     r.id_usuario,
                     STRING_AGG(v.nombre_vacuna, ', ') AS vacunas,
@@ -331,7 +331,7 @@ export const getRegVacunacionesxPaciente = async (req: Request, res: Response) =
                     )
                     and r.id_paciente = :idPaciente
                 ORDER BY 
-                    r.fecha_registro DESC
+                    r.id_vacunacion DESC
             `;
 
             const registros = await sequelize.query(
