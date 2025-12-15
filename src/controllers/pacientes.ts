@@ -370,6 +370,9 @@ export const getPacientes = async (req: Request, res: Response) => {
                     { model: AntecedenteMedico },
                     { model: DatoAdministrativo }
                 ],
+                where : {
+                    id_empresa : idEmpresa
+                },
                 order: [
                     ['createdAt', 'DESC']
                 ]
