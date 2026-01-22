@@ -10,7 +10,7 @@ export const RegVacunacionVacunas = sequelize.define('t_registro_vacunacion_vacu
     id_vacunacion: {
         type: DataTypes.INTEGER,
         allowNull: false
-    }, 
+    },
     id_vacuna: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -20,7 +20,15 @@ export const RegVacunacionVacunas = sequelize.define('t_registro_vacunacion_vacu
         allowNull: true
     },
     id_usuario: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    registro_sanitario_vacuna: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    dosis_aplicada: {
+        type: DataTypes.INTEGER,
         allowNull: true
     }
 });

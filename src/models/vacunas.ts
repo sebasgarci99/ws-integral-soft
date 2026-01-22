@@ -2,8 +2,8 @@ import { DataTypes } from "sequelize";
 import sequelize from "../db/connection";
 
 export const Vacunas = sequelize.define('t_vacuna', {
-    id : {
-        type : DataTypes.INTEGER,
+    id: {
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
@@ -16,36 +16,36 @@ export const Vacunas = sequelize.define('t_vacuna', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    principio_activo :  {
+    principio_activo: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    concentracion : {
+    concentracion: {
         type: DataTypes.DECIMAL(3, 2),
         allowNull: true
     },
-    unidad_medida : {
+    unidad_medida: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    fecha_lote : {
+    fecha_lote: {
         type: DataTypes.DATE,
         allowNull: true
     },
-    fecha_vencimiento : {
+    fecha_vencimiento: {
         type: DataTypes.DATE,
         allowNull: true
     },
     id_laboratorio: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true
     },
     registro_sanitario: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: true
     },
     cantidad_dosis: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true
     },
     estado: {
@@ -56,7 +56,7 @@ export const Vacunas = sequelize.define('t_vacuna', {
         allowNull: true
     },
     id_usuario: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true
     }
 })

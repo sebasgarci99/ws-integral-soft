@@ -7,6 +7,7 @@ import { Usuario } from "../models/usuario";
 import jwt from "jsonwebtoken";
 import sequelize from "../db/connection";
 import { Op, QueryTypes } from "sequelize";
+import { Vacunas } from "../models/vacunas";
 
 
 // ================================
@@ -42,7 +43,7 @@ const getIdEmpresaDesdeToken = (req: Request): number | null => {
 
     try {
         const tokenDesencriptado: any = jwt.verify(
-            bearerToken, 
+            bearerToken,
             process.env.SECRET_KEY || 'pRu3b4_4sD1*2*3'
         );
         return tokenDesencriptado.idEmpresa;
@@ -54,7 +55,7 @@ const getIdEmpresaDesdeToken = (req: Request): number | null => {
 
 const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital: any): Promise<any | null> => {
     try {
-        if(idVacunacion != 0 || idVacunacion != null) {
+        if (idVacunacion != 0 || idVacunacion != null) {
             let firma = firma_digital === null || firma_digital == 'null' ? '' : String(firma_digital);
 
             let sql = `
@@ -176,15 +177,15 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
             const result: any = await sequelize.query(
                 sql,
                 {
-                    replacements: { 
-                        idVacunacion, 
-                        firma 
+                    replacements: {
+                        idVacunacion,
+                        firma
                     },
                     type: QueryTypes.RAW
                 }
             );
 
-            const rows = result[0]; 
+            const rows = result[0];
             if (rows && rows[0] && rows[0].id_consentimiento) {
                 // Extraemos el HTML del consentimiento creado.
                 sql = `
@@ -192,9 +193,9 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
                 `;
 
                 const resultDocConsentimiento: any = await sequelize.query(
-                    sql, 
+                    sql,
                     {
-                        replacements: { 
+                        replacements: {
                             idVacunacion
                         },
                         type: QueryTypes.SELECT,
@@ -207,12 +208,12 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
             }
 
         }
-    } catch(error) {
+    } catch (error) {
         console.error("Error al crear el registro de datos del consentimiento:", error);
         return null;
-    }   
+    }
 }
-   
+
 // ================================
 // GET - Listar registros con vacunas aplicadas
 // ================================
@@ -309,6 +310,8 @@ export const getRegVacunacionesxPaciente = async (req: Request, res: Response) =
             let idEmpresa = usuario?.getDataValue("id_empresa");
             let idPaciente = req.body.id_paciente;
 
+            await sequelize.query(`SET TIME ZONE 'America/Bogota';`);
+
             // SQL base
             let sql = `
                 select
@@ -317,7 +320,12 @@ export const getRegVacunacionesxPaciente = async (req: Request, res: Response) =
                     v.nombre_vacuna,
                     v.presentacion_comercial,
                     v.cantidad_dosis,
-                    to_char(r.fecha_registro, 'DD/MM/YYYY HH12:MI AM') as fecha
+                    to_char(
+                        r.fecha_registro::timestamp,
+                        'DD/MM/YYYY HH24:MI:SS'
+                    ) AS fecha_registro,
+                    rv.registro_sanitario_vacuna,
+                    rv.dosis_aplicada
                 FROM t_registro_vacunacions r
                 JOIN t_registro_vacunacion_vacunas rv 
                     ON r.id_vacunacion = rv.id_vacunacion
@@ -335,11 +343,11 @@ export const getRegVacunacionesxPaciente = async (req: Request, res: Response) =
             `;
 
             const registros = await sequelize.query(
-                sql, 
+                sql,
                 {
-                    replacements: { 
-                        idUsuario, 
-                        idEmpresa, 
+                    replacements: {
+                        idUsuario,
+                        idEmpresa,
                         idPaciente
                     },
                     type: QueryTypes.SELECT,
@@ -381,11 +389,13 @@ export const getRegConsentimientosxPaciente = async (req: Request, res: Response
             let idEmpresa = usuario?.getDataValue("id_empresa");
             let idPaciente = req.body.id_paciente;
 
+            await sequelize.query(`SET TIME ZONE 'America/Bogota';`);
+
             // SQL base
             let sql = `
                 select
                     c.id_consentimiento,
-                    to_char(c.fecha_registro, 'DD/MM/YYYY HH12:MI AM') as fecha_reg,
+                    to_char(c.fecha_registro, 'DD/MM/YYYY HH24:MI') as fecha_reg,
                     c.nombre_paciente,
                     r.acudiente,
                     f_procesar_datos_consentimiento(r.id_vacunacion)
@@ -404,11 +414,11 @@ export const getRegConsentimientosxPaciente = async (req: Request, res: Response
             `;
 
             const registros = await sequelize.query(
-                sql, 
+                sql,
                 {
-                    replacements: { 
-                        idUsuario, 
-                        idEmpresa, 
+                    replacements: {
+                        idUsuario,
+                        idEmpresa,
                         idPaciente
                     },
                     type: QueryTypes.SELECT,
@@ -475,7 +485,7 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                 } else {
 
                     await RegVacunacion.update(
-                        registro, 
+                        registro,
                         {
                             where: { id_vacunacion },
                         }
@@ -500,12 +510,18 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                 // aplanar todos los id_vacuna en una sola lista
                 const idsVacunas = vacunas.flatMap((v: any) => v.id_vacuna);
 
-                const registrosVacunas = idsVacunas.map(
-                    (idVacuna: number) => ({
-                        id_vacunacion: registroCreado.id_vacunacion,
-                        id_vacuna: idVacuna,
-                        id_empresa: req.body.id_empresa,
-                        id_usuario: idUsuario,
+                const registrosVacunas = await Promise.all(
+                    idsVacunas.map(async (idVacuna: number) => {
+                        const vacuna = await Vacunas.findByPk(idVacuna) as any;
+
+                        return {
+                            id_vacunacion: registroCreado.id_vacunacion,
+                            id_vacuna: idVacuna,
+                            id_empresa: req.body.id_empresa,
+                            id_usuario: idUsuario,
+                            registro_sanitario_vacuna: vacuna?.registro_sanitario ?? null,
+                            dosis_aplicada: req.body.vacunas_aplicadas?.find((v: any) => v.id_vacuna === idVacuna)?.dosis_aplicada ?? null
+                        };
                     })
                 );
 
@@ -514,7 +530,7 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
 
             // Construimos el arreglo de datos del consentimiento 
             let data_consentimiento = await crearDocumentoConsentimiento(
-                registroCreado.id_vacunacion, 
+                registroCreado.id_vacunacion,
                 req.body.firma_usuario_acudiente
             );
 
