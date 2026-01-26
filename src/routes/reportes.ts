@@ -5,7 +5,9 @@ import {
     getReportTotalizado,
     getReporteMesActualGraficas,
     getReporteMesConsultorioGraficas,
-    getReporteGraficaxUsuario
+    getReporteGraficaxUsuario,
+    getReporteVacunacion,
+    getReporteVacunasAplicadas
 } from '../controllers/reportes';
 import validateToken from '../routes/validate-token';
 
@@ -18,5 +20,8 @@ router.post('/getReporteMesActualGraficas', validateToken, getReporteMesActualGr
 router.post('/getReporteMesConsultorioGraficas', validateToken, getReporteMesConsultorioGraficas);
 
 router.post('/getReporteGraficaxUsuario', validateToken, getReporteGraficaxUsuario);
+
+router.post('/getReporteVacunacion', validateToken, getReporteVacunacion);
+router.post('/getReporteVacunasAplicadas', validateToken, getReporteVacunasAplicadas);
 
 export default router;

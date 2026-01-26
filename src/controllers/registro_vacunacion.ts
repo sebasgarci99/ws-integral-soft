@@ -541,7 +541,9 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                 state: "OK",
                 body: {
                     registroCreado,
-                    f_procesar_datos_consentimiento: data_consentimiento
+                    f_procesar_datos_consentimiento: data_consentimiento,
+                    // Se retorna el id_vacunacion como id_consentimiento 
+                    id_consentimiento: registroCreado.id_vacunacion
                 }
             });
         }
