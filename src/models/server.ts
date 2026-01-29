@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 import routeUsuario from '../routes/usuario';
 import routeConsultorio from '../routes/consultorios';
 import routeRecoleccion from '../routes/registro_recoleccion';
@@ -7,6 +7,7 @@ import routeCorreoSmtp from '../routes/correo_smtp_empresa';
 import routeVacunas from '../routes/vacunas';
 import routePacientes from '../routes/pacientes';
 import routeRegVacunacion from '../routes/registro_vacunacion';
+import routeRegTemperatura from '../routes/registro_temperatura';
 
 import sequelize from '../db/connection';
 import { Usuario } from './usuario';
@@ -27,10 +28,11 @@ import { DatoAdministrativo } from './datos_admin_pacientes';
 import { RegVacunacion } from './registro_vacunacion';
 import { RegVacunacionVacunas } from './registro_vacunacion_vacunas';
 import { Doc_Consentimiento } from './doc_consentimiento';
+import { RegistroTemperatura } from './registro_temperatura';
 
 class Server {
-    private app : express.Application;
-    private port : string;
+    private app: express.Application;
+    private port: string;
 
     constructor() {
         this.app = express();
@@ -57,7 +59,7 @@ class Server {
         this.app.get('/api/getUsuarios', validateToken, getUsuario);
 
         //this.app.post('/api/login', loginUser)
-        
+
         this.app.use('/api/usuario', routeUsuario);
         this.app.use('/api/consultorio', routeConsultorio);
         this.app.use('/api/reg_recoleccion', routeRecoleccion);
@@ -66,6 +68,7 @@ class Server {
         this.app.use('/api/vacunas', routeVacunas);
         this.app.use('/api/pacientes', routePacientes);
         this.app.use('/api/reg_vacunacion', routeRegVacunacion);
+        this.app.use('/api/reg_temperatura', routeRegTemperatura);
     }
 
     midlewares() {
@@ -97,15 +100,16 @@ class Server {
             await ModuloxUsuario.sync();
             await CorreoSmtpEmpresa.sync();
             await Laboratorio.sync();
-            await Vacunas.sync(); 
+            await Vacunas.sync();
             await Paciente.sync();
             await AntecedenteMedico.sync();
             await DatoAdministrativo.sync();
             await RegVacunacion.sync();
             await RegVacunacionVacunas.sync();
             await Doc_Consentimiento.sync();
+            await RegistroTemperatura.sync();
 
-        } catch(error) {
+        } catch (error) {
             console.error("Error de conexión a la bd: ", error);
         }
     }
