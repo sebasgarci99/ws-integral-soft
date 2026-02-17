@@ -299,7 +299,10 @@ export const getReporteVacunacion = async (req: Request, res: Response) => {
                     rv.dosis_aplicada,
                     EXTRACT(YEAR FROM AGE(r.fecha_registro, p.fecha_nacimiento))::int || ' años ' ||
                     EXTRACT(MONTH FROM AGE(r.fecha_registro, p.fecha_nacimiento))::int || ' meses ' ||
-                    EXTRACT(DAY FROM AGE(r.fecha_registro, p.fecha_nacimiento))::int || ' días' AS edad_vacuna
+                    EXTRACT(DAY FROM AGE(r.fecha_registro, p.fecha_nacimiento))::int || ' días' AS edad_vacuna,
+                    r.vacunacion_empresa,
+                    r.empresa_entidad,
+                    r.orden_remision
                 FROM t_registro_vacunacions r
                 JOIN t_registro_vacunacion_vacunas rv 
                     ON r.id_vacunacion = rv.id_vacunacion
@@ -317,7 +320,7 @@ export const getReporteVacunacion = async (req: Request, res: Response) => {
                         :idPaciente is null
                         or r.id_paciente = :idPaciente
                     )
-                    and r.fecha_registro between :fechaInicio and :fechaFin
+                    and r.fecha_registro AT TIME ZONE 'America/Bogota' between :fechaInicio and :fechaFin
                 ORDER BY 
                     anio_vacunacion DESC,
                     mes_vacunacion DESC,
@@ -334,6 +337,8 @@ export const getReporteVacunacion = async (req: Request, res: Response) => {
                     type: QueryTypes.SELECT
                 }
             );
+
+            console.log("results", results);
 
             res.json({
                 msg: 'Get Reporte Vacunacion',

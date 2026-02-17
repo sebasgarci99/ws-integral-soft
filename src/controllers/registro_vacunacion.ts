@@ -90,7 +90,7 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
                     r.acudiente,
                     r.num_documento_acudiente,
                     r.aplica_acudiente,
-                    current_timestamp, -- fecha registro 
+                    r.fecha_registro, -- fecha registro 
                     :firma::text, -- firma digital paciente
                     NULL, -- u.firma_digital, -- firma digital usuario o empresa NOTA=Se deja en NULL para no generar tanto peso
                     null, -- e.logo_empresa, -- NOTA=Se deja en NULL para no generar tanto peso
@@ -155,6 +155,7 @@ const crearDocumentoConsentimiento = async (idVacunacion: number, firma_digital:
                     p.apellidos, 
                     p.numero_documento,
                     r.acudiente, 
+                    r.fecha_registro,
                     r.num_documento_acudiente,
                     e.ciudad, 
                     e.empresa,
@@ -325,7 +326,10 @@ export const getRegVacunacionesxPaciente = async (req: Request, res: Response) =
                         'DD/MM/YYYY HH24:MI:SS'
                     ) AS fecha_registro,
                     rv.registro_sanitario_vacuna,
-                    rv.dosis_aplicada
+                    rv.dosis_aplicada,
+                    r.vacunacion_empresa,
+                    r.empresa_entidad,
+                    r.orden_remision
                 FROM t_registro_vacunacions r
                 JOIN t_registro_vacunacion_vacunas rv 
                     ON r.id_vacunacion = rv.id_vacunacion
@@ -470,6 +474,9 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                 estado: req.body.estado || "A",
                 id_empresa: idEmpresa,
                 id_usuario: idUsuario,
+                vacunacion_empresa: req.body.vacunacion_empresa,
+                empresa_entidad: req.body.empresa_entidad,
+                orden_remision: req.body.orden_remision,
             };
 
             let registroCreado: any;
@@ -497,9 +504,8 @@ export const crearActualizarRegVacunacion = async (req: Request, res: Response) 
                     await RegVacunacionVacunas.destroy({
                         where: { id_vacunacion },
                     });
-
-
                 }
+
             } else {
                 registroCreado = await RegVacunacion.create(registro);
             }

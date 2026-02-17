@@ -15,7 +15,7 @@ export const RegVacunacion = sequelize.define('t_registro_vacunacion', {
         type: DataTypes.DATE,
         allowNull: false
     },
-    aplica_acudiente : {
+    aplica_acudiente: {
         type: DataTypes.BOOLEAN,
         allowNull: true
     },
@@ -35,7 +35,19 @@ export const RegVacunacion = sequelize.define('t_registro_vacunacion', {
         allowNull: true
     },
     id_usuario: {
-        type : DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true
-    }
+    },
+    vacunacion_empresa: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    empresa_entidad: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    orden_remision: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
 });
